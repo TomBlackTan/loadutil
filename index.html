@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no">
+
+  <title>LayerList widget with actions - 4.10</title>
+
+  <style>
+    html,
+    body,
+    #viewDiv {
+      padding: 0;
+      margin: 0;
+      height: 100%;
+      width: 100%;
+      overflow: hidden;
+    }
+  </style>
+
+  
+
+
+
+</head>
+
+<body>
+  <div id="viewDiv"></div>
+  
+    <script>
+   var load = (function() {
+  // 返回一个函数的函数: https://davidwalsh.name/javascript-functions
+  function _load(tag) {
+    return function(url) {
+      // 这个promise使用Promise.all确定成功或失败
+      return new Promise(function(resolve, reject) {
+        var element = document.createElement(tag);
+        var parent = 'body';
+        var attr = 'src';
+
+        // promise重要的成功和失败
+        element.onload = function() {
+          resolve(url);
+        };
+        element.onerror = function() {
+          reject(url);
+        };
+
+        // 需要根据标签类型设置不同的属性
+        switch(tag) {
+          case 'script':
+            element.async = true;
+            break;
+          case 'link':
+            element.type = 'text/css';
+            element.rel = 'stylesheet';
+            attr = 'href';
+            parent = 'head';
+        }
+
+        // 注入文件以启动加载
+        element[attr] = url;
+        document[parent].appendChild(element);
+      });
+    };
+  }
+
+  return {
+    css: _load('link'),
+    js: _load('script'),
+    img: _load('img')
+  }
+})();
+
+// 用法:  用一个回调加载不同的文件类型
+Promise.all([
+    load.js('lib/highlighter.js'), 
+    load.js('lib/main.js'), 
+    load.css('lib/highlighter.css'),
+    load.img('images/logo.png')
+  ]).then(function() {
+    console.log('Everything has loaded!');
+  }).catch(function() {
+    console.log('Oh no, epic failure!');
+  });
+  </script>
+</body>
+
+</html>
